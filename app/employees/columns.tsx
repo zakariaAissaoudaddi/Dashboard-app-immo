@@ -58,7 +58,7 @@ export const columns: ColumnDef<Employees>[] = [
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: "Status" ,
       
     },
     {
