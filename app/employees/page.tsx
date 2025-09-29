@@ -38,7 +38,7 @@ const EmployeesPage = async () => {
 const data = await getData();
 return <div className="mb-8 px-4 py-2 bg-secondary rounded-md">
         <div className="font-somibold">
-          All Employees
+          All Employee
         </div>
         <DataTable columns={columns} data={data}/>
      </div>;
