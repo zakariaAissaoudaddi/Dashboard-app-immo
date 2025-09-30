@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table"
 import { DataTablePagination } from "@/components/ui/TablePagination"
 import { Button } from "@/components/ui/button"
-import { CircleFadingPlus } from "lucide-react"
+import { CircleFadingPlus, Trash2 } from "lucide-react"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -51,11 +51,18 @@ export function DataTable<TData, TValue>({
   return (
     <div>
       {/* Button row above the table */}
-      <div className="flex items-center justify-end mb-4">
-        <Button className="bg-green-600 hover:bg-green-700 text-white">
-            Add Employee
-            <CircleFadingPlus size={40} />
+      <div className="flex justify-end gap-2">
+        <div className="flex items-center justify-end mb-4">
+        <Button className="bg-red-500 hover:bg-red-600 text-white" size="icon" onClick={() => alert(`Delete `)} >
+            <Trash2 />
         </Button>
+        </div>
+        <div className="flex items-center justify-end mb-4">
+        <Button className="bg-green-500 hover:bg-green-600 text-white" size="icon" onClick={() => alert(`Add `)}>
+          
+            <CircleFadingPlus />
+        </Button>
+        </div>
       </div>
 
       {/* Table container */}

@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 
 import { ColumnDef } from "@tanstack/react-table"
 import { table } from "console";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, Eye, FileUser, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Value } from "@radix-ui/react-select";
 
 
@@ -41,56 +41,57 @@ export const columns: ColumnDef<Employees>[] = [
     {
       accessorKey: "username",
       header: "user",
+      cell: ({ row }) => <div className="text-left">{row.getValue("username")}</div>,
     },
     {
       accessorKey: "email",
       header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
+        return (
+          <div className="text-left w-full">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="mx-auto"
+            >
+              Email
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        )
       },
+      cell: ({ row }) => (
+        <div className="text-left w-full">{row.getValue("email")}</div>
+      ),
     },
+
     {
       accessorKey: "status",
-      header: "Status" ,
-      
+      header: () => <div className="text-left">Status</div>,
+      cell: ({ row }) => <div className="text-left">{row.getValue("status")}</div>,
     },
     {
       accessorKey: "amount",
-      header: "Amount",
+        header: () => <div className="text-left">Amount</div>,
+        cell: ({ row }) => <div className="text-left">{row.getValue("amount")}</div>,
     },
-    {
-    id: "actions",
-    cell: ({ row }) => {
-      const payment = row.original
- 
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0 ">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
-            >
-              Copy payment ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
+  {
+  id: "actions",
+  header: () => <div className="text-right">Actions</div>,
+  cell: ({ row }) => {
+    const employee = row.original
+    return (
+      <div className="flex justify-end gap-2">
+        <Button className="bg-red-500 hover:bg-red-600 text-white" size="icon" onClick={() => alert(`Delete ${employee.username}`)}>
+          <Trash2 className="h-4 w-4" />
+        </Button>
+        <Button className="bg-blue-500 hover:bg-blue-600 text-white" size="icon" onClick={() => alert(`Edit ${employee.username}`)}>
+          <Pencil className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="icon" onClick={() => alert(`View ${employee.username}`)}>
+          <Eye  className="h-4 w-4" />
+        </Button>
+      </div>
+    )
   },
+}
 ]
