@@ -1,18 +1,9 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, Eye, FileUser, Pencil, Trash2 } from "lucide-react";
+import { ArrowUpDown, Eye, Pencil, Trash2 } from "lucide-react"
 
 import {
   Sheet,
@@ -23,65 +14,64 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 
-
 export type Employees = {
-    id:string;
-    amount:number;
-    username:string;
-    email:string;
-    status:"pending" | "processing"| "success" | "failed" ;
+  id: string
+  amount: number
+  username: string
+  email: string
+  status: "pending" | "processing" | "success" | "failed"
 }
 
 export const columns: ColumnDef<Employees>[] = [
   {
-    id:"select",
-    header:({table})=>( 
-      <Checkbox 
-        onCheckedChange={(value)=>table.toggleAllPageRowsSelected(!!value)}
-        checked={table.getIsAllPageRowsSelected()||table.getIsSomePageRowsSelected() && "indeterminate"}
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        onCheckedChange={(value) =>
+          table.toggleAllPageRowsSelected(!!value)
+        }
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
       />
     ),
-    cell:({row})=>(
-      <Checkbox 
-        onCheckedChange={(value)=>row.toggleSelected(!!value)}
+    cell: ({ row }) => (
+      <Checkbox
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
         checked={row.getIsSelected()}
       />
-    )
+    ),
   },
   {
     accessorKey: "username",
-    header: "user",
-    cell: ({ row }) => <div className="text-left">{row.getValue("username")}</div>,
+    header: "User",
+    cell: ({ row }) => <div>{row.getValue("username")}</div>,
   },
   {
     accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <div className="text-left w-full">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="mx-auto"
-          >
-            Email
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      )
-    },
-    cell: ({ row }) => (
-      <div className="text-left w-full">{row.getValue("email")}</div>
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() =>
+          column.toggleSorting(column.getIsSorted() === "asc")
+        }
+      >
+        Email
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
     ),
+    cell: ({ row }) => <div>{row.getValue("email")}</div>,
   },
   {
     accessorKey: "status",
-    header: () => <div className="text-left">Status</div>,
-    cell: ({ row }) => <div className="text-left">{row.getValue("status")}</div>,
+    header: "Status",
+    cell: ({ row }) => <div>{row.getValue("status")}</div>,
   },
   {
     accessorKey: "amount",
-    header: () => <div className="text-left">Amount</div>,
-    cell: ({ row }) => <div className="text-left">{row.getValue("amount")}</div>,
+    header: "Amount",
+    cell: ({ row }) => <div>{row.getValue("amount")}</div>,
   },
   {
     id: "actions",
@@ -91,18 +81,27 @@ export const columns: ColumnDef<Employees>[] = [
       return (
         <div className="flex justify-end gap-2">
           {/* Delete */}
-          <Button 
-            className="bg-red-500 hover:bg-red-600 text-white" 
-            size="icon" 
-            onClick={() => alert(`Delete ${employee.username}`)}
+          <Button
+            className="bg-red-500 hover:bg-red-600 text-white"
+            size="icon"
+            onClick={async () => {
+              const res = await fetch(`/api/employees/${employee.id}`, {
+                method: "DELETE",
+              })
+              if (res.ok) window.location.reload()
+              else alert("Delete failed")
+            }}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
 
-          {/* Edit (Sheet) */}
+          {/* Edit */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button className="bg-blue-500 hover:bg-blue-600 text-white" size="icon">
+              <Button
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+                size="icon"
+              >
                 <Pencil className="h-4 w-4" />
               </Button>
             </SheetTrigger>
@@ -110,28 +109,59 @@ export const columns: ColumnDef<Employees>[] = [
               <SheetHeader>
                 <SheetTitle>Edit {employee.username}</SheetTitle>
                 <SheetDescription>
-                  Update the employee information and save changes.
+                  Update employee details and save.
                 </SheetDescription>
               </SheetHeader>
-
               <div className="mt-4 space-y-4">
                 <input
+                  id="username"
                   type="text"
                   defaultValue={employee.username}
                   className="w-full rounded border px-2 py-1"
                 />
                 <input
+                  id="email"
                   type="email"
                   defaultValue={employee.email}
                   className="w-full rounded border px-2 py-1"
                 />
                 <input
+                  id="amount"
                   type="number"
                   defaultValue={employee.amount}
                   className="w-full rounded border px-2 py-1"
                 />
 
-                <Button className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white">
+                <Button
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                  onClick={async () => {
+                    const updated = {
+                      username: (document.querySelector(
+                        "#username"
+                      ) as HTMLInputElement).value,
+                      email: (document.querySelector(
+                        "#email"
+                      ) as HTMLInputElement).value,
+                      amount: Number(
+                        (document.querySelector(
+                          "#amount"
+                        ) as HTMLInputElement).value
+                      ),
+                      status: "pending",
+                    }
+
+                    const res = await fetch(
+                      `/api/employees/${employee.id}`,
+                      {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(updated),
+                      }
+                    )
+                    if (res.ok) window.location.reload()
+                    else alert("Update failed")
+                  }}
+                >
                   Save changes
                 </Button>
               </div>
@@ -139,15 +169,15 @@ export const columns: ColumnDef<Employees>[] = [
           </Sheet>
 
           {/* View */}
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={() => alert(`View ${employee.username}`)}
           >
-            <Eye  className="h-4 w-4" />
+            <Eye className="h-4 w-4" />
           </Button>
         </div>
       )
     },
-  }
+  },
 ]
