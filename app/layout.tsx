@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import AppSidebar from "@/components/ui/AppSidebar";
-import Navbar from "@/components/ui/Navbar";
 import { ThemeProvider } from "@/components/ui/providers/theme-provider";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { cookies } from "next/headers";
+import LayoutClient from "@/components/ui/LayoutClient"; // 👈 import it
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,28 +27,21 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies()
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
+
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex` }
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex`}>
         <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-            >
-              <SidebarProvider defaultOpen={defaultOpen}>
-
-               <AppSidebar/>
-                   <main className="w-full">
-                    <Navbar/>
-                    <div className="px-4">{children}</div>
-                   </main>
-               </SidebarProvider>
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <LayoutClient defaultOpen={defaultOpen}>
+            {children}
+          </LayoutClient>
         </ThemeProvider>
-        
       </body>
     </html>
-  );
+  )
 }

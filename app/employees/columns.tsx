@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, Eye, Pencil, Trash2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import {
   Sheet,
@@ -77,6 +78,7 @@ export const columns: ColumnDef<Employees>[] = [
     id: "actions",
     header: () => <div className="text-right">Actions</div>,
     cell: ({ row }) => {
+      const router = useRouter()
       const employee = row.original
       return (
         <div className="flex justify-end gap-2">
@@ -170,12 +172,12 @@ export const columns: ColumnDef<Employees>[] = [
 
           {/* View */}
           <Button
-            variant="outline"
-            size="icon"
-            onClick={() => alert(`View ${employee.username}`)}
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
+          variant="outline"
+    
+          onClick={() => router.push(`/employees/${employee.id}`)}
+        >
+          <Eye className="h-4 w-4" /> 
+        </Button>
         </div>
       )
     },
