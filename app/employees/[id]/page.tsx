@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { deflateSync } from "node:zlib"
 
 export default function EmployeeDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()

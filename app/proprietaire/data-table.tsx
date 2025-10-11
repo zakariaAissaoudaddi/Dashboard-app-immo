@@ -53,67 +53,79 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  // Keep a local copy of table data (so we can update live)
   const [tableData, setTableData] = React.useState(data)
-
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [rowSelection, setRowSelection] = React.useState({})
+  const [open, setOpen] = React.useState(false)
+
+  // Form fields
+  const [username, setUsername] = React.useState("")
+  const [email, setEmail] = React.useState("")
+  const [nom, setNom] = React.useState("")
+  const [prenom, setPrenom] = React.useState("")
+  const [date_naissance, setDate_naissance] = React.useState("")
 
   const table = useReactTable({
     data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    state: { sorting, rowSelection },
     onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
     onRowSelectionChange: setRowSelection,
+    getPaginationRowModel: getPaginationRowModel(),
+    state: {
+      sorting,
+      rowSelection,
+    },
   })
 
-  // State for Add Employee dialog
-  const [open, setOpen] = React.useState(false)
-  const [username, setUsername] = React.useState("")
-  const [email, setEmail] = React.useState("")
-  const [amount, setAmount] = React.useState<number>(0)
-  const [status, setStatus] = React.useState("pending")
-
-  // Refresh from API
-  async function refreshData() {
-    const res = await fetch("/api/employees", { cache: "no-store" })
+  // 🔄 Refresh data
+  const refreshData = async () => {
+    const res = await fetch("/api/proprietaire", { cache: "no-store" })
     if (res.ok) {
       const newData = await res.json()
       setTableData(newData)
     }
   }
 
-  async function handleAddEmployee() {
-    const res = await fetch("/api/employees", {
+  // ✅ Add new Proprietaire (with validation + error handling)
+  async function handleAddProprietaire() {
+    if (!username || !email || !nom || !prenom || !date_naissance) {
+      alert("Please fill all fields before saving.")
+      return
+    }
+
+    const res = await fetch("/api/proprietaire", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, email, amount, status }),
+      body: JSON.stringify({ username, email, nom, prenom, date_naissance }),
     })
+
     if (res.ok) {
       setOpen(false)
       setUsername("")
       setEmail("")
-      setAmount(0)
-      setStatus("pending")
-      await refreshData()
+      setNom("")
+      setPrenom("")
+      setDate_naissance("")
+      refreshData()
     } else {
-      alert("Failed to save employee")
+      const error = await res.json()
+      alert("Failed to add proprietaire: " + error.error)
     }
   }
 
-  async function handleDeleteSelected() {
+  // ❌ Delete selected proprietaires
+  async function handleDeleteProprietaire() {
     const selected = table.getSelectedRowModel().rows
     if (selected.length === 0) {
-      alert("No employees selected.")
+      alert("No proprietaire selected.")
       return
     }
 
     for (const row of selected) {
-      const employee = row.original as any
-      await fetch(`/api/employees/${employee.id}`, { method: "DELETE" })
+      const proprietaire = row.original as any
+      await fetch(`/api/proprietaire/${proprietaire.id}`, { method: "DELETE" })
     }
 
     await refreshData()
@@ -121,96 +133,90 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      {/* Button row above the table */}
-      <div className="flex justify-end gap-2">
-        {/* Delete Button with AlertDialog */}
-        <div className="flex items-center justify-end mb-4">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button className="bg-red-500 hover:bg-red-600 text-white" size="icon">
-                <Trash2 />
+      {/* Top buttons */}
+      <div className="flex justify-end gap-2 mb-4">
+        {/* Delete */}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button className="bg-red-500 hover:bg-red-600 text-white" size="icon">
+              <Trash2 />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. It will permanently remove the selected proprietaires.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-500 hover:bg-red-600 text-white"
+                onClick={handleDeleteProprietaire}
+              >
+                Confirm Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Add */}
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-green-500 hover:bg-green-600 text-white" size="icon">
+              <CircleFadingPlus />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Proprietaire</DialogTitle>
+              <DialogDescription>Fill the form below.</DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 space-y-4">
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded px-3 py-2"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <input
+                type="email"
+                className="w-full border border-gray-300 rounded px-3 py-2"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded px-3 py-2"
+                placeholder="Nom"
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
+              />
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded px-3 py-2"
+                placeholder="Prenom"
+                value={prenom}
+                onChange={(e) => setPrenom(e.target.value)}
+              />
+              <input
+                type="date"
+                className="w-full border border-gray-300 rounded px-3 py-2"
+                value={date_naissance}
+                onChange={(e) => setDate_naissance(e.target.value)}
+              />
+              <Button
+                onClick={handleAddProprietaire}
+                className="w-full bg-green-500 hover:bg-green-600 text-white"
+              >
+                Save
               </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Selected Employees?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. It will permanently remove the
-                  selected employees from the system.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-red-500 hover:bg-red-600 text-white"
-                  onClick={handleDeleteSelected}
-                >
-                  Confirm Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-
-        {/* Add Button with Dialog */}
-        <div className="flex items-center justify-end mb-4">
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-green-500 hover:bg-green-600 text-white" size="icon">
-                <CircleFadingPlus />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Employee</DialogTitle>
-                <DialogDescription>
-                  Fill in the details below to add a new employee.
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="mt-4 space-y-4">
-                <input
-                  type="text"
-                  placeholder="Username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full rounded border px-2 py-1"
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded border px-2 py-1"
-                />
-                <input
-                  type="number"
-                  placeholder="Amount"
-                  value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value))}
-                  className="w-full rounded border px-2 py-1"
-                />
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="w-full rounded border px-2 py-1"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="success">Success</option>
-                  <option value="failed">Failed</option>
-                </select>
-
-                <Button
-                  onClick={handleAddEmployee}
-                  className="w-full bg-green-500 hover:bg-green-600 text-white"
-                >
-                  Save Employee
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Table */}

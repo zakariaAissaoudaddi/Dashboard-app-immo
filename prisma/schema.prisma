@@ -20,6 +20,34 @@ model Employee {
   status   String
   amount   Int
 }
+model Proprietaire {
+  id                          Int      @id @default(autoincrement())
+  civilite                    String   // "Madame" | "Monsieur" | "Mademoiselle"
+  nom                         String
+  prenom                      String
+  date_naissance              DateTime
+  profession                  String
+  lieu_travail                String
+  nature_piece                String   // "CNI" | "PASSEPORT" | "PERMIS_DE_CONDUIRE"
+  numero_piece                String
+  date_delivrance             DateTime
+  date_expiration             DateTime
+  lieu_delivrance             String
+  adresse                     String
+  ville                       String
+  quertie                     String
+  telephone                   String
+
+  nom_personne_cas_urgence    String
+  prenom_personne_cas_urgence String
+  telephone_personne_cas_urgence String
+
+  username                    String
+  email                       String  @unique
+  password                    String
+  courriel                    String
+}
+
 
 
 
